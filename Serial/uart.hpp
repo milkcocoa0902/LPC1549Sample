@@ -13,23 +13,19 @@
 #include <cstring>
 #include <vector>
 #include <utility>
-#include <chip.hpp>
+
 #include "gpio.hpp"
 #include "text.hpp"
 
 namespace Driver{
 	class Serial{
-	private:
-		static constexpr uint32_t UartChNum = 3;
+	public:
+		static constexpr uint8_t UartChNum = 3;
 		static constexpr size_t TxSize = 128, RxSize = 128; //バッファーのサイズ
-		static RINGBUFF_T TxBuf[UartChNum], RxBuf[UartChNum];
-		static char TxRaw[UartChNum][TxSize], RxRaw[UartChNum][RxSize];
-		static LPC_USART_T* UartBase[UartChNum];
+	private:
 		Driver::GPIO::Digital tx, rx;
-		uint32_t id;
 		uint32_t baud;
-
-
+		uint8_t id;
 	public:
 		Serial() = default;
 		Serial(std::pair<uint8_t, uint8_t> _tx, std::pair<uint8_t, uint8_t> _rx, uint32_t _id, uint32_t _baud = 115200);
@@ -57,10 +53,12 @@ namespace Driver{
 		bool IsLine(){
 			return IsExist('\r');
 		}
+		RINGBUFF_T* GetTxBuf();
+		RINGBUFF_T* GetRxBuf();
+		LPC_USART_T* GetBase()const;
+
 		void setBaud(uint32_t _baud);
-		static void IRQHandler(uint32_t _id){
-			Chip_UART_IRQRBHandler(Serial::UartBase[_id], &Serial::RxBuf[_id], &Serial::TxBuf[_id]);
-		}
+		static void IRQHandler(uint32_t _id);
 
 		void operator<<(const std::string& _str){
 			Write(_str);

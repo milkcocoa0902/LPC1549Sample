@@ -7,17 +7,17 @@
 
 #include <ring_buffer.hpp>
 #include <chip.hpp>
-
+#include <algorithm>
 #include "uart.hpp"
 
-
+#define forever() for(;;)
 
 namespace Driver{
-		constexpr uint32_t Serial::UartChNum;
+		constexpr uint8_t Serial::UartChNum;
 		constexpr size_t Serial::TxSize, Serial::RxSize; //バッファーのサイズ
-		RINGBUFF_T Serial::TxBuf[3], Serial::RxBuf[3];
-		char Serial::TxRaw[3][TxSize], Serial::RxRaw[3][RxSize];
-		LPC_USART_T* Serial::UartBase[3] = {LPC_USART0, LPC_USART1, LPC_USART2};
+		static RINGBUFF_T TxBuf[Serial::UartChNum], RxBuf[Serial::UartChNum];
+		static char TxRaw[Serial::UartChNum][Serial::TxSize],RxRaw[Serial::UartChNum][Serial::RxSize];
+		static constexpr LPC_USART_T* UartBase[Serial::UartChNum] = {LPC_USART0, LPC_USART1, LPC_USART2};
 
 		Serial::Serial(std::pair<uint8_t, uint8_t> _tx, std::pair<uint8_t, uint8_t> _rx, uint32_t _id, uint32_t _baud):
 						tx(Driver::GPIO::Digital{_tx.first, _tx.second}),
@@ -25,8 +25,8 @@ namespace Driver{
 						id(_id),
 						baud(_baud)
 		{
-			tx(GPIO::DIRECTION_OUTPUT)((CHIP_SWM_PIN_FIXED_T)(SWM_UART0_TXD_O + 0x11 * id));
-			rx(GPIO::DIRECTION_INPUT)((CHIP_SWM_PIN_FIXED_T)(SWM_UART0_RXD_I + 0x11 * id));
+			tx(GPIO::Direction::Out)((CHIP_SWM_PIN_FIXED_T)(SWM_UART0_TXD_O + 0x11 * id));
+			rx(GPIO::Direction::In)((CHIP_SWM_PIN_FIXED_T)(SWM_UART0_RXD_I + 0x11 * id));
 			//Clock Supply
 			Chip_Clock_SetUARTBaseClockRate(Chip_Clock_GetMainClockRate(), false);
 			Chip_Clock_SetUARTFRGDivider(1);
@@ -52,8 +52,21 @@ namespace Driver{
 		}
 
 		void Serial::Write(const uint8_t* _data, size_t _sz) {
-			while(IsFull());
-			Chip_UART_SendRB(UartBase[id], &TxBuf[id], _data, _sz);
+			//空き容量を調べる。
+			size_t free= RingBuffer_GetFree(GetTxBuf());
+			size_t send;//送信する量
+			size_t pos=0;
+			//送信する
+			forever(){
+				//空き容量分、送信する
+				send = std::min(free,_sz);
+				Chip_UART_SendRB(GetBase(),GetTxBuf(),_data+pos,send);
+				pos+=send;
+				//終了処理確認
+				if (pos==_sz)return;
+				//待つ
+				//Nop();(スリープ命令またはタクスの切り替えを行う)
+			}
 		}
 
 		void Serial::Write(const char* _str) {
@@ -98,7 +111,7 @@ namespace Driver{
 
 		std::string Serial::Read(size_t _sz) {
 			std::string s = "";
-			while (_sz--){
+			while (_sz--||!IsEmpty()){
 				s += ReadByte();
 			}
 			return s;
@@ -149,6 +162,22 @@ namespace Driver{
 		void Serial::setBaud(uint32_t _baud){
 			baud = _baud;
 			Chip_UART_SetBaud(UartBase[id], baud);
+		}
+
+		RINGBUFF_T* Serial::GetTxBuf(){
+			return &TxBuf[id];
+		}
+
+		RINGBUFF_T* Serial::GetRxBuf(){
+			return &RxBuf[id];
+		}
+
+		LPC_USART_T* Serial::GetBase()const{
+			return UartBase[id];
+		}
+
+		void Serial::IRQHandler(uint32_t _id){
+			Chip_UART_IRQRBHandler(UartBase[_id], &RxBuf[_id], &TxBuf[_id]);
 		}
 
 		extern "C" void UART0_IRQHandler(void) {

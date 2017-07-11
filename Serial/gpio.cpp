@@ -63,7 +63,7 @@ namespace Driver{
 		}
 
 		const Digital& Digital::operator()(Direction _dir)const{
-			if(_dir == Direction_e::DIRECTION_OUTPUT)
+			if(_dir == Direction::Out)
 				return this->Dout();
 			else
 				return this->Din();

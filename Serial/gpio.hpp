@@ -19,10 +19,10 @@ namespace Driver{
 	using id_t = uint8_t;
 
 	namespace GPIO{
-		typedef enum Direction_e{
-			DIRECTION_OUTPUT = 0,
-			DIRECTION_INPUT,
-		}Direction;
+		enum class Direction:bool{
+			Out = false,
+			In,
+		};
 
 		struct Digital{
 			port_t mPort;
