@@ -11,83 +11,69 @@
 
 namespace Driver{
 	namespace GPIO{
-		void Digital::Set(bool _flag)const {
-			Chip_GPIO_SetPinState(LPC_GPIO, mPort, mPin, _flag);
-		}
+		Digital::Digital(const uint8_t _port, const uint8_t _pin):
+				port(_port),
+				pin(_pin){
 
-		bool Digital::Get() const{
-			return Chip_GPIO_GetPinState(LPC_GPIO, mPort, mPin);
 		}
 
 		void Digital::Toggle() const{
-			Chip_GPIO_SetPinToggle(LPC_GPIO, mPort, mPin);
+			Chip_GPIO_SetPinToggle(LPC_GPIO, port, pin);
 		}
 
-		const Digital& Digital::Din()const {
-			Chip_IOCON_PinMuxSet(LPC_IOCON, mPort, mPin,
-			IOCON_DIGMODE_EN | IOCON_MODE_PULLUP);
-			Chip_GPIO_SetPinDIRInput(LPC_GPIO, mPort, mPin);
-			return *this;
+		uint8_t Digital::port_()const{
+			return port;
 		}
-
-		const Digital& Digital::Dout()const {
-			Chip_IOCON_PinMuxSet(LPC_IOCON, mPort, mPin,
-			IOCON_MODE_INACT | IOCON_DIGMODE_EN);
-			Chip_GPIO_SetPinDIROutput(LPC_GPIO, mPort, mPin);
-			Chip_GPIO_SetPinState(LPC_GPIO, mPort, mPin, true);
-			return *this;
+		uint8_t Digital::pin_()const{
+			return pin;
 		}
 
 		const Digital& Digital::Open()const {
-			Chip_IOCON_PinMuxSet(LPC_IOCON, mPort, mPin,
+			Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin,
 			IOCON_ADMODE_EN | IOCON_MODE_PULLDOWN); //アナログ化することで解放にする。
 			return *this;
 		}
 
-		const Digital& Digital::Move(CHIP_SWM_PIN_MOVABLE_T _func)const{
-			Chip_SWM_MovablePortPinAssign(_func, mPort, mPin);
-			return *this;
+		void Digital::operator()(const bool _flag) const{
+			Chip_GPIO_SetPinState(LPC_GPIO, port, pin, _flag);
 		}
 
-		const Digital& Digital::Fix(CHIP_SWM_PIN_FIXED_T _fix)const{
-			Chip_SWM_FixedPinEnable(_fix, true);
-			return *this;
-		}
-
-		void Digital::operator()(bool _flag) const{
-			this->Set(_flag);
+		void Digital::operator<<(const bool _flag)const{
+			Chip_GPIO_SetPinState(LPC_GPIO, port, pin, _flag);
 		}
 
 		bool Digital::operator()()const{
-			return this->Get();
+			return Chip_GPIO_GetPinState(LPC_GPIO, port, pin);
 		}
 
-		const Digital& Digital::operator()(Direction _dir)const{
-			if(_dir == Direction_e::DIRECTION_OUTPUT)
-				return this->Dout();
-			else
-				return this->Din();
+		void Digital::operator>>(bool _in)const{
+			_in = Chip_GPIO_GetPinState(LPC_GPIO, port, pin);
 		}
 
-		const Digital& Digital::operator()(CHIP_SWM_PIN_MOVABLE_T _func)const{
-			return this->Move(_func);
+		const Digital& Digital::operator()(const Direction _dir)const{
+			if(_dir == Direction_e::DIRECTION_OUTPUT){
+				Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin,
+				IOCON_MODE_INACT | IOCON_DIGMODE_EN);
+				Chip_GPIO_SetPinDIROutput(LPC_GPIO, port, pin);
+				Chip_GPIO_SetPinState(LPC_GPIO, port, pin, true);
+				return *this;
+			}else{
+				Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin,
+				IOCON_DIGMODE_EN | IOCON_MODE_PULLUP);
+				Chip_GPIO_SetPinDIRInput(LPC_GPIO, port, pin);
+				return *this;
+			}
 		}
 
-		const Digital& Digital::operator()(CHIP_SWM_PIN_FIXED_T _fix)const{
-			return this->Fix(_fix);
-		}
-
-		const Analog& Analog::Init(CHIP_SWM_PIN_FIXED_T _pin)const{
-			Chip_IOCON_PinMuxSet(LPC_IOCON, mPort, _pin,
-			IOCON_ADMODE_EN | IOCON_MODE_PULLDOWN);
-			Chip_SWM_FixedPinEnable(_pin, true);
+		const Digital& Digital::operator()(const CHIP_SWM_PIN_MOVABLE_T _func)const{
+			Chip_SWM_MovablePortPinAssign(_func, port, pin);
 			return *this;
 		}
 
-		const Analog& Analog::operator()(CHIP_SWM_PIN_FIXED_T _pin)const{
-			return this->Init(_pin);
+		const Digital& Digital::operator()(const CHIP_SWM_PIN_FIXED_T _fix)const{
+			Chip_SWM_FixedPinEnable(_fix, true);
+			return *this;
 		}
-
 	}
 }
 

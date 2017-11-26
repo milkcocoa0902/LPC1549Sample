@@ -26,7 +26,7 @@ int main(){
 	// システムタイマの初期化(delay用)
 	Driver::Tick::Init();
 
-	// LED1 -> P1_8, LED2 -> P1_8 ,LED3 -> P1_5
+	// LED1 -> P1_8, LED2 -> P1_4 ,LED3 -> P1_5
 	Driver::GPIO::Digital LED1{1, 8}, LED2{1, 4}, LED3{1, 5};
 
 	// LEDピンの入出力方向

@@ -7,12 +7,13 @@
 
 
 #include "systick.hpp"
-#include "chip.hpp"
+#include <chip.hpp>
 
 namespace Driver{
 	namespace Tick{
 		volatile static uint64_t tick;
 		static constexpr uint64_t freq = 100000; // T = 10[us]. 過負荷かもしれないからもしかしたら分解能下げる
+		static uint64_t unUsedValue;
 
 		void Init(){
 			SysTick_Config(SystemCoreClock / freq);
@@ -31,17 +32,26 @@ namespace Driver{
 			return CurrentTick() / 100;
 		}
 
-		void DelayUs(uint64_t _us){
+		void __DelayUs(const uint64_t _us){
 			uint64_t time = CurrentTickUs() + _us / 10;
 			while(CurrentTickUs() < time){
-				__NOP();
+				// __NOP()だとCPUが止まるから
+				unUsedValue++;
 			}
 		}
 
-		void DelayMs(uint64_t _ms){
+		void DelayMs(const uint64_t _ms){
 			uint64_t time = CurrentTickMs() + _ms;
 			while(CurrentTickMs() < time) {
-				__NOP();
+				unUsedValue++;
+			}
+		}
+
+		void Delay(const uint64_t _sec){
+			auto time = _sec;
+			while(time > 0){
+				DelayMs(1000);
+				time--;
 			}
 		}
 

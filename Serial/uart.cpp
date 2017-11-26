@@ -18,25 +18,30 @@ namespace Driver{
 		RINGBUFF_T Serial::TxBuf[3], Serial::RxBuf[3];
 		char Serial::TxRaw[3][TxSize], Serial::RxRaw[3][RxSize];
 		LPC_USART_T* Serial::UartBase[3] = {LPC_USART0, LPC_USART1, LPC_USART2};
+		std::array<Util::CallBack, Serial::UartChNum> Serial::Callback;
 
-		Serial::Serial(std::pair<uint8_t, uint8_t> _tx, std::pair<uint8_t, uint8_t> _rx, uint32_t _id, uint32_t _baud):
+		Serial::Serial(const std::pair<uint8_t, uint8_t> _tx, const std::pair<uint8_t, uint8_t> _rx, const uint32_t _id, const uint32_t _baud):
 						tx(Driver::GPIO::Digital{_tx.first, _tx.second}),
 						rx(Driver::GPIO::Digital{_rx.first, _rx.second}),
 						id(_id),
 						baud(_baud)
 		{
-			tx(GPIO::DIRECTION_OUTPUT)((CHIP_SWM_PIN_FIXED_T)(SWM_UART0_TXD_O + 0x11 * id));
-			rx(GPIO::DIRECTION_INPUT)((CHIP_SWM_PIN_FIXED_T)(SWM_UART0_RXD_I + 0x11 * id));
+			tx(GPIO::DIRECTION_OUTPUT)((CHIP_SWM_PIN_MOVABLE_T)(SWM_UART0_TXD_O + 0x11 * id));
+			rx(GPIO::DIRECTION_INPUT)((CHIP_SWM_PIN_MOVABLE_T)(SWM_UART0_RXD_I + 0x11 * id));
+
 			//Clock Supply
 			Chip_Clock_SetUARTBaseClockRate(Chip_Clock_GetMainClockRate(), false);
 			Chip_Clock_SetUARTFRGDivider(1);
 			Chip_UART_Init(UartBase[id]);
+
 			//Configuration
 			Chip_UART_ConfigData(UartBase[id], UART_CFG_DATALEN_8 | UART_CFG_PARITY_NONE | UART_CFG_STOPLEN_1);
 			Chip_UART_SetBaud(UartBase[id], baud);
+
 			//Buffer Initialize
 			RingBuffer_Init(&TxBuf[id], &TxRaw[id][0], sizeof(char), TxSize);
 			RingBuffer_Init(&RxBuf[id], &RxRaw[id][0], sizeof(char), RxSize);
+
 			//割り込み処理
 			Chip_UART_IntEnable(UartBase[id], UART_INTEN_RXRDY | UART_INTEN_TXRDY);
 			NVIC_EnableIRQ((IRQn_Type)(UART0_IRQn + id));
@@ -46,13 +51,12 @@ namespace Driver{
 
 		}
 
-		void Serial::Write(char _c) {
+		void Serial::Write(const char _c) {
 			while(IsFull());
 			Chip_UART_SendRB(UartBase[id], &TxBuf[id], &_c, sizeof(char));
 		}
 
-		void Serial::Write(const uint8_t* _data, size_t _sz) {
-			while(IsFull());
+		void Serial::Write(const uint8_t* _data, const size_t _sz) {
 			Chip_UART_SendRB(UartBase[id], &TxBuf[id], _data, _sz);
 		}
 
@@ -96,9 +100,10 @@ namespace Driver{
 			return c;
 		}
 
-		std::string Serial::Read(size_t _sz) {
+		std::string Serial::Read(const size_t _sz) {
 			std::string s = "";
-			while (_sz--){
+			auto len = _sz;
+			while (len--){
 				s += ReadByte();
 			}
 			return s;
@@ -137,7 +142,7 @@ namespace Driver{
 			return !RingBuffer_IsEmpty(&TxBuf[id]);
 		}
 
-		bool Serial::IsExist(char _c){
+		bool Serial::IsExist(const char _c){
 			auto* data = (char*)RxRaw[id];
 			for (unsigned int i = RxBuf[id].tail; i != RxBuf[id].head; i = (i + 1) % RxBuf[id].count){
 				if (data[i]==_c)
@@ -146,9 +151,17 @@ namespace Driver{
 			return false;
 		}
 
-		void Serial::setBaud(uint32_t _baud){
+		void Serial::setBaud(const uint32_t _baud){
 			baud = _baud;
 			Chip_UART_SetBaud(UartBase[id], baud);
+		}
+
+		void Serial::SetCallback(const Util::CallBackRef _callback){
+			Callback[id] = std::move(_callback);
+		}
+
+		void Serial::SetCallback(const Util::CallBackRRef _callback){
+			Callback[id] = std::move(_callback);
 		}
 
 		extern "C" void UART0_IRQHandler(void) {

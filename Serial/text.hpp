@@ -17,8 +17,9 @@
 namespace Util{
 	extern char NewLine;
 	extern char Comma;
-	std::vector<std::string> Split(const std::string& text, const std::string& seq);
-	std::string Space(const std::string& str, unsigned int s);
+
+	std::vector<std::string> Split(const std::string& _text, const std::string& _seq);
+	std::string Space(const std::string& _str, unsigned int _s);
 
 
 	std::string ToStr(int64_t);
@@ -29,23 +30,23 @@ namespace Util{
 	//template <class T,uint X,uint Y>std::string ToStr(const Matrix<T,X,Y>&);
 
 	Math::fix32 ToFix(const std::string&);
-	template<class T> T ToInt(const std::string& text);
+	template<class T> T ToInt(const std::string& _text);
 	int32_t ToInt32(const std::string&);
 	int64_t ToInt64(const std::string&);
 	uint32_t ToUInt32(const std::string&);
 	uint64_t ToUInt64(const std::string&);
 	float ToFloat(const std::string&);
 
-	static inline int32_t FromNumber(char c){
-		return c - '0';
+	static inline int32_t FromNumber(char _c){
+		return _c - '0';
 	}
 
-	static inline char ToChar(int32_t value){
-		if(value < 0)
-			value = 0;
-		if(value > 9)
-			value = 9;
-		return '0' + value;
+	static inline char ToChar(int32_t _value){
+		if(_value < 0)
+			_value = 0;
+		if(_value > 9)
+			_value = 9;
+		return '0' + _value;
 	}
 
 	bool IsNumberPattern(const std::string&);
@@ -74,7 +75,7 @@ namespace Util{
 		CmdParser();
 		CmdParser(const CmdParser&) = delete;
 		virtual ~CmdParser() = default;
-		bool Parse(TextIterator_t begin, TextIterator_t);
+		bool Parse(TextIterator begin, TextIterator);
 		bool Search(const std::string& _option = "", uint32_t* _index = nullptr);
 		void Clear();
 		bool IsOptionNull();

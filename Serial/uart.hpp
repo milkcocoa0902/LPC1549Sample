@@ -13,9 +13,10 @@
 #include <cstring>
 #include <vector>
 #include <utility>
-#include <chip.hpp>
+#include <array>
 #include "gpio.hpp"
 #include "text.hpp"
+#include "type.hpp"
 
 namespace Driver{
 	class Serial{
@@ -25,6 +26,7 @@ namespace Driver{
 		static RINGBUFF_T TxBuf[UartChNum], RxBuf[UartChNum];
 		static char TxRaw[UartChNum][TxSize], RxRaw[UartChNum][RxSize];
 		static LPC_USART_T* UartBase[UartChNum];
+		static std::array<Util::CallBack, UartChNum> Callback;
 		Driver::GPIO::Digital tx, rx;
 		uint32_t id;
 		uint32_t baud;
@@ -32,11 +34,11 @@ namespace Driver{
 
 	public:
 		Serial() = default;
-		Serial(std::pair<uint8_t, uint8_t> _tx, std::pair<uint8_t, uint8_t> _rx, uint32_t _id, uint32_t _baud = 115200);
+		Serial(const std::pair<uint8_t, uint8_t> _tx, const std::pair<uint8_t, uint8_t> _rx, const uint32_t _id, const uint32_t _baud = 115200);
 		Serial(const Serial&) = default;
 		virtual ~Serial() = default;
 
-		void Write(char _c);
+		void Write(const char _c);
 		void Write(const uint8_t* _data, size_t _sz);
 		void Write(const char* _str);
 		void Write(const std::vector<uint8_t>& _data);
@@ -46,20 +48,26 @@ namespace Driver{
 		void WriteLine(const std::vector<uint8_t>& bytes);
 		void Write(const std::string& _text);
 		char ReadByte();
-		std::string Read(size_t _sz);
+		std::string Read(const size_t _sz);
 		std::string Read();
 		std::string ReadLine();
 		bool IsEmpty();
 		bool IsFull();
 		void Claer();
 		bool IsBusy();
-		bool IsExist(char _c);
-		bool IsLine(){
-			return IsExist('\r');
-		}
-		void setBaud(uint32_t _baud);
+		bool IsExist(const char _c);
+		void setBaud(const uint32_t _baud);
+		void SetCallback(const Util::CallBackRef _callback);
+		void SetCallback(const Util::CallBackRRef _callback);
 		static void IRQHandler(uint32_t _id){
+			auto isReceive = ((Chip_UART_GetStatus(Serial::UartBase[_id]) & UART_STAT_RXRDY) != 0);
+
 			Chip_UART_IRQRBHandler(Serial::UartBase[_id], &Serial::RxBuf[_id], &Serial::TxBuf[_id]);
+
+			if((Callback[_id] != nullptr) &&  isReceive){
+				auto& func = Callback[_id];
+				func();
+			}
 		}
 
 		void operator<<(const std::string& _str){

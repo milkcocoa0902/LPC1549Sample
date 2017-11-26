@@ -30,8 +30,6 @@ int main(){
 	// GPIOモジュールにクロックを供給
 	Chip_GPIO_Init(LPC_GPIO);
 
-	// タイマモジュールの初期化
-	Driver::Timer::Init();
 
 	// LED3 -> P1_5
 	Driver::GPIO::Digital LED3{1, 5};
@@ -41,10 +39,15 @@ int main(){
 	LED3(Driver::GPIO::DIRECTION_OUTPUT)(false);
 
 	// コールバック関数を登録する
-	Driver::Timer::SetCallback(0, 5, LED2Blink);
+	Driver::Timer timer0(0);
+	timer0.SetCallback(5, LED2Blink);
 
 	// Timerのコールバックにはラムダ式も登録できる
-	Driver::Timer::SetCallback(1, 5, [&LED3](){LED3.Toggle();});
+	Driver::Timer timer1(1);
+	timer1.SetCallback(5, [LED3]{LED3.Toggle();});
+
+	timer0.Start();
+	timer1.Start();
 
 	while(1);
 }

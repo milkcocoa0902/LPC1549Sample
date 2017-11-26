@@ -86,6 +86,12 @@ uint32_t Chip_Clock_GetSystemPLLOutClockRate(void)
 								 Chip_Clock_GetSystemPLLInClockRate());
 }
 
+/* Return USB PLL input clock rate */
+uint32_t Chip_Clock_GetUSBPLLInClockRate(void)
+{
+	return Chip_Clock_GetPLLInClockRate(LPC_SYSCTL->USBPLLCLKSEL);
+}
+
 /* Return USB PLL output clock rate */
 uint32_t Chip_Clock_GetUSBPLLOutClockRate(void)
 {
@@ -93,6 +99,18 @@ uint32_t Chip_Clock_GetUSBPLLOutClockRate(void)
 								 Chip_Clock_GetUSBPLLInClockRate());
 }
 
+/* Return SCT PLL input clock rate */
+uint32_t Chip_Clock_GetSCTPLLInClockRate(void)
+{
+	return Chip_Clock_GetPLLInClockRate(LPC_SYSCTL->SCTPLLCLKSEL);
+}
+
+/* Return SCT PLL output clock rate */
+uint32_t Chip_Clock_GetSCTPLLOutClockRate(void)
+{
+	return Chip_Clock_GetPLLFreq(LPC_SYSCTL->SCTPLLCTRL,
+								 Chip_Clock_GetSCTPLLInClockRate());
+}
 
 /* Return main A clock rate */
 uint32_t Chip_Clock_GetMain_A_ClockRate(void)
@@ -199,6 +217,32 @@ uint32_t Chip_Clock_GetMainClockRate(void)
 	return clkRate;
 }
 
+/* Return ADC asynchronous clock rate */
+uint32_t Chip_Clock_GetADCASYNCRate(void)
+{
+	uint32_t clkRate = 0;
+
+	switch (Chip_Clock_GetADCASYNCSource()) {
+	case SYSCTL_ADCASYNCCLKSRC_IRC:
+		clkRate = Chip_Clock_GetIntOscRate();
+		break;
+
+	case SYSCTL_ADCASYNCCLKSRC_SYSPLLOUT:
+		clkRate = Chip_Clock_GetSystemPLLOutClockRate();
+		break;
+
+	case SYSCTL_ADCASYNCCLKSRC_USBPLLOUT:
+		clkRate = Chip_Clock_GetUSBPLLOutClockRate();
+		break;
+
+	case SYSCTL_ADCASYNCCLKSRC_SCTPLLOUT:
+		clkRate = Chip_Clock_GetSCTPLLOutClockRate();
+		break;
+	}
+
+	return clkRate;
+}
+
 /**
  * @brief	Set CLKOUT clock source and divider
  * @param	src	: Clock source for CLKOUT
@@ -269,6 +313,71 @@ uint32_t Chip_Clock_GetSysTickClockRate(void)
 	}
 
 	return sysRate;
+}
+
+/* Get UART base rate */
+uint32_t Chip_Clock_GetUARTBaseClockRate(void)
+{
+	uint64_t inclk;
+	uint32_t div;
+
+	div = (uint32_t) Chip_Clock_GetUARTFRGDivider();
+	if (div == 0) {
+		/* Divider is 0 so UART clock is disabled */
+		inclk = 0;
+	}
+	else {
+		uint32_t mult, divmult;
+
+		/* Input clock into FRG block is the divided main system clock */
+		inclk = (uint64_t) (Chip_Clock_GetMainClockRate() / div);
+
+		divmult = LPC_SYSCTL->FRGCTRL & 0xFFFF;
+		if ((divmult & 0xFF) == 0xFF) {
+			/* Fractional part is enabled, get multiplier */
+			mult = (divmult >> 8) & 0xFF;
+
+			/* Get fractional error */
+			inclk = (inclk * 256) / (uint64_t) (256 + mult);
+		}
+	}
+
+	return (uint32_t) inclk;
+}
+
+/* Set UART base rate */
+uint32_t Chip_Clock_SetUARTBaseClockRate(uint32_t rate, bool fEnable)
+{
+	uint32_t div, inclk;
+
+	/* Input clock into FRG block is the main system cloock */
+	inclk = Chip_Clock_GetMainClockRate();
+
+	/* Get integer divider for coarse rate */
+	div = inclk / rate;
+	if (div == 0) {
+		div = 1;
+	}
+
+	/* Approximated rate with only integer divider */
+	Chip_Clock_SetUARTFRGDivider((uint8_t) div);
+
+	if (fEnable) {
+		uint32_t err;
+		uint64_t uart_fra_multiplier;
+
+		err = inclk - (rate * div);
+		uart_fra_multiplier = ((uint64_t) err  * 256) / (uint64_t) (rate * div);
+
+		/* Enable fractional divider and set multiplier */
+		LPC_SYSCTL->FRGCTRL = 0xFF | ((uart_fra_multiplier & 0xFF) << 8);
+	}
+	else {
+		/* Disable fractional generator and use integer divider only */
+		LPC_SYSCTL->FRGCTRL = 0;
+	}
+
+	return Chip_Clock_GetUARTBaseClockRate();
 }
 
 /* Bypass System Oscillator and set oscillator frequency range */

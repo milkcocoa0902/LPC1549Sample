@@ -10,20 +10,33 @@
 
 #include <chip.hpp>
 #include "functional"
+#include "type.hpp"
+#include "stdint.h"
+#include <array>
 
 namespace Driver{
-	namespace Timer{
+	enum TimerNumber{
+		TIMER_SYSTEM = 0,
+		TIMER_ADC  = 1,
+		TIMER_RUNNING = 2,
+		TIMER_UNUSED = 3
 
-		//コールバック関数の型
-		using CallBack_t = std::function<void(void)>;
-		using CallBackRef_t = const std::function<void(void)>&;
-		using CallBackRRef_t = std::function<void(void)>&&;
+	};
+	class Timer{
+	private:
+		static std::array<Util::CallBack, MRT_CHANNELS_NUM> CallBack;
+		uint32_t ch;
+	public:
+		Timer() = default;
+		Timer(const uint32_t _ch);
+		virtual ~Timer();
+		const Timer& SetCallback(const uint32_t _hz, const Util::CallBackRef _handler = nullptr);
+		const Timer& SetCallback(const uint32_t _hz, const Util::CallBackRRef _handler);
+		static Util::CallBackRef GetCallback(const int _ch);
+		const Timer& Start();
+		const Timer& Stop();
 
-		void Init();
-		void SetCallback(uint8_t _ch, uint32_t _hz, CallBackRef_t _handler = nullptr);
-		void SetCallback(uint8_t _ch, uint32_t _hz, CallBackRRef_t _handler);
-		void Finish();
-	}
+	};
 }
 
 #endif /* DRIVER_TIMER_HPP_ */

@@ -14,13 +14,13 @@ namespace Util{
 	char NewLine = '\r';
 	char Comma = ',';
 
-	std::vector<std::string> Split(const std::string& text, const std::string& seq) {
+	std::vector<std::string> Split(const std::string& _text, const std::string& _seq) {
 		std::vector<std::string> arg;
 		std::string line;
 
-		for (char s : text) {
+		for (char s : _text) {
 			bool flag = false; //分割フラグ
-			for (char cmp : seq) {
+			for (char cmp : _seq) {
 				if (cmp == s) {
 					flag = true;
 					break;
@@ -44,19 +44,19 @@ namespace Util{
 		return move(arg);
 	}
 
-	std::string Space(const std::string& str, unsigned int s) {
+	std::string Space(const std::string& _str, unsigned int _s) {
 		std::string ans = "";
-		for (unsigned int i = 0; i < s; i++) {
-			ans += str;
+		for (unsigned int i = 0; i < _s; i++) {
+			ans += _str;
 		}
 		return ans;
 	}
 
-	std::string ToStr(int64_t value) {
+	std::string ToStr(int64_t _value) {
 
 		std::vector<char> sp;
 		sp.reserve(32);
-		int64_t a = Math::abs(value);
+		int64_t a = Math::abs(_value);
 		while (a > 0) {
 			sp.push_back(ToChar(a % 10));
 			a /= 10;
@@ -65,7 +65,7 @@ namespace Util{
 		if (sp.empty()) {
 			return "0";
 		} else {
-			std::string ans = Math::sign(value) ? "-" : "";
+			std::string ans = Math::sign(_value) ? "-" : "";
 			do {
 				ans += sp.back();
 				sp.pop_back();
@@ -75,9 +75,9 @@ namespace Util{
 
 	}
 
-	std::string ToStr(Math::fix32 value) {
+	std::string ToStr(Math::fix32 _value) {
 		int32_t num, point;
-		Math::fix32 a = Math::abs(value);
+		Math::fix32 a = Math::abs(_value);
 		num = a.GetInt();
 		point = a.GetPoint();
 
@@ -90,15 +90,15 @@ namespace Util{
 			point -= c * 65536 / b;
 			b *= 10;
 		}
-		bool sign = Math::sign<Math::fix32>(value);
+		bool sign = Math::sign<Math::fix32>(_value);
 
 		if(sign)
 			ans = "-" + ans;
 		return ans;
 	}
 
-	std::string ToStrF(float raw) {
-		return ToStr(Math::fix32::CreateFloat(raw));
+	std::string ToStrF(float _raw) {
+		return ToStr(Math::fix32::CreateFloat(_raw));
 	}
 
 	Math::fix32 ToFix(const std::string& text) {
@@ -136,12 +136,12 @@ namespace Util{
 		return fix;
 	}
 
-	template<class T> T ToInt(const std::string& text) {
+	template<class T> T ToInt(const std::string& _text) {
 		uint32_t idx = 0;
 		bool sign = false;
 		char c;
-		auto next = [&text,&idx]()->char {
-			return text[idx++];
+		auto next = [&_text,&idx]()->char {
+			return _text[idx++];
 		};
 		T num = 0;
 		c = next();
@@ -162,11 +162,11 @@ namespace Util{
 		return num;
 	}
 
-	template<class T> T ToUInt(const std::string& text) {
+	template<class T> T ToUInt(const std::string& _text) {
 		uint32_t idx = 0;
 		char c;
-		auto next = [&text,&idx]()->char {
-			return text[idx++];
+		auto next = [&_text,&idx]()->char {
+			return _text[idx++];
 		};
 		T num = 0;
 		c = next();
@@ -178,28 +178,28 @@ namespace Util{
 		return num;
 	}
 
-	int32_t ToInt32(const std::string& text) {
-		return ToInt<int32_t>(text);
+	int32_t ToInt32(const std::string& _text) {
+		return ToInt<int32_t>(_text);
 	}
 
-	int64_t ToInt64(const std::string& text) {
-		return ToInt<int64_t>(text);
+	int64_t ToInt64(const std::string& _text) {
+		return ToInt<int64_t>(_text);
 	}
 
-	uint32_t ToUInt32(const std::string& text) {
-		return ToUInt<uint32_t>(text);
+	uint32_t ToUInt32(const std::string& _text) {
+		return ToUInt<uint32_t>(_text);
 	}
 
-	uint64_t ToUInt64(const std::string& text) {
-		return ToUInt<uint64_t>(text);
+	uint64_t ToUInt64(const std::string& _text) {
+		return ToUInt<uint64_t>(_text);
 	}
 
-	float ToFloat(const std::string& text) {
+	float ToFloat(const std::string& _text) {
 		uint32_t idx = 0;
 		bool sign = false; //マイナスならtrue
 		char c;
-		auto next = [&text,&idx]()->char {
-			return text[idx++];
+		auto next = [&_text,&idx]()->char {
+			return _text[idx++];
 		};
 		float raw = 0.0f;
 		c = next();
@@ -230,8 +230,8 @@ namespace Util{
 	}
 
 
-	bool IsNumberPattern(const std::string& text) {
-		auto it = text.begin();
+	bool IsNumberPattern(const std::string& _text) {
+		auto it = _text.begin();
 		if (IsEnd(*it)) return false; //nullは論外
 		//符号はなくてもいい
 		if (IsSign(*it)) {
@@ -259,8 +259,8 @@ namespace Util{
 		return true;
 	}
 
-	bool IsUnsignedNumberPatten(const std::string& text) {
-		auto it = text.begin();
+	bool IsUnsignedNumberPatten(const std::string& _text) {
+		auto it = _text.begin();
 		if (IsEnd(*it)) return false; //nullは論外
 		if (*it=='+'){
 			it++;
@@ -284,8 +284,8 @@ namespace Util{
 		return true;
 	}
 
-	bool IsOptionPattern(const std::string& text) {
-		auto it = text.begin();
+	bool IsOptionPattern(const std::string& _text) {
+		auto it = _text.begin();
 		if (IsEnd(*it))
 			return false;
 
@@ -319,7 +319,7 @@ namespace Util{
 		}
 	}
 
-	bool CmdParser::Parse(TextIterator_t _begin, TextIterator_t _end){
+	bool CmdParser::Parse(TextIterator _begin, TextIterator _end){
 		this->Clear();
 
 		if(*_begin ==  "")

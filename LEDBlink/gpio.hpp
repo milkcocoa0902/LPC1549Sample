@@ -24,53 +24,26 @@ namespace Driver{
 			DIRECTION_INPUT,
 		}Direction;
 
-		struct Digital{
-			port_t mPort;
-			pin_t mPin;
-
-		private:
-			void Set(bool)const;
-			bool Get()const;
-
+		class Digital{
 		public:
+			port_t port;
+			pin_t pin;
+
+			Digital() = default;
+			Digital(const uint8_t _port, const uint8_t _pin);
+			Digital(const Digital&) = default;
 			void Toggle()const;
-			//設定用関数
-
-		private:
-			const Digital& Din()const;
-			const Digital& Dout()const;
-
-		public:
+			uint8_t port_()const;
+			uint8_t pin_()const;
 			const Digital& Open()const;
-
-		private:
-			const Digital& Move(CHIP_SWM_PIN_MOVABLE_T)const;
-			const Digital& Fix(CHIP_SWM_PIN_FIXED_T)const;
-
-		public:
-			void operator()(bool)const;
+			void operator()(const bool)const;
+			void operator<<(const bool)const;
 			bool operator()()const;
-			const Digital& operator()(Direction)const;
-			const Digital& operator()(CHIP_SWM_PIN_MOVABLE_T)const;
-			const Digital& operator()(CHIP_SWM_PIN_FIXED_T)const;
-		};
-
-		struct Analog{
-			port_t mPort;
-			pin_t mPin;
-			module_t mModule;
-			id_t mId;
-
-		private:
-			const Analog& Init(CHIP_SWM_PIN_FIXED_T)const;
-			Digital AsDigital()const{
-				return Digital{mPort, mPin};
-			}
-		public:
-			const Analog& operator()(CHIP_SWM_PIN_FIXED_T)const;
-			Digital operator ()()const{
-				return Digital{mPort, mPin};
-			}
+			void operator>>(bool)const;
+			const Digital& operator()(const Direction)const;
+			const Digital& operator()(const CHIP_SWM_PIN_MOVABLE_T)const;
+			const Digital& operator()(const CHIP_SWM_PIN_FIXED_T)const;
+			//設定用関数
 		};
 	}
 }

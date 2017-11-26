@@ -13,8 +13,9 @@
 namespace Driver{
 	namespace Tick{
 		void Init();
-		void DelayUs(uint64_t);
-		void DelayMs(uint64_t);
+		void DelayUS(const uint64_t);
+		void DelayMs(const uint64_t);
+		void Delay(const uint64_t);
 	}
 }
 
