@@ -20,7 +20,7 @@ namespace Driver{
 		NVIC_EnableIRQ(MRT_IRQn);
 	}
 
-	const Timer& Timer::SetCallback(const uint32_t _hz, const Util::CallBackRef _callback) {
+	const Timer& Timer::SetCallback(const uint32_t _hz, const Util::CallBackRef _callback)const {
 
 		auto* p = Chip_MRT_GetRegPtr(ch);
 		CallBack[ch] = _callback;
@@ -38,7 +38,7 @@ namespace Driver{
 		return *this;
 	}
 
-	const Timer& Timer::SetCallback(const uint32_t _hz, const Util::CallBackRRef _callback) {
+	const Timer& Timer::SetCallback(const uint32_t _hz, const Util::CallBackRRef _callback)const {
 
 		auto* p = Chip_MRT_GetRegPtr(ch);
 
@@ -55,12 +55,12 @@ namespace Driver{
 		return *this;
 	}
 
-	const Timer& Timer::Start(){
+	const Timer& Timer::Start()const{
 		Chip_MRT_SetEnabled(Chip_MRT_GetRegPtr(ch));
 		return *this;
 	}
 
-	const Timer& Timer::Stop(){
+	const Timer& Timer::Stop()const{
 		Chip_MRT_SetDisabled(Chip_MRT_GetRegPtr(ch));
 		return *this;
 	}
