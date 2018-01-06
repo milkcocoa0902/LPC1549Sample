@@ -30,11 +30,11 @@ namespace Driver{
 		Timer() = default;
 		Timer(const uint32_t _ch);
 		virtual ~Timer();
-		const Timer& SetCallback(const uint32_t _hz, const Util::CallBackRef _handler = nullptr);
-		const Timer& SetCallback(const uint32_t _hz, const Util::CallBackRRef _handler);
+		const Timer& SetCallback(const uint32_t _hz, const Util::CallBackRef _handler = nullptr)const;
+		const Timer& SetCallback(const uint32_t _hz, const Util::CallBackRRef _handler)const;
 		static Util::CallBackRef GetCallback(const int _ch);
-		const Timer& Start();
-		const Timer& Stop();
+		const Timer& Start()const;
+		const Timer& Stop()const;
 
 	};
 }
