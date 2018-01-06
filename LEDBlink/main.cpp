@@ -26,16 +26,33 @@ int main(){
 	// システムタイマの初期化(delay用)
 	Driver::Tick::Init();
 
-	// LED1 -> P1_8, LED2 -> P1_4 ,LED3 -> P1_5
-	Driver::GPIO::Digital LED1{1, 8}, LED2{1, 4}, LED3{1, 5};
+	// LED1 -> P0_18, LED2 -> P0_10 ,LED3 -> P0_11
+	Driver::GPIO::Digital LED1{0, 18}, LED2{0, 10}, LED3{0, 11};
 
 	// LEDピンの入出力方向
-	LED2(Driver::GPIO::DIRECTION_OUTPUT)(true);
+	LED1(Driver::GPIO::DIRECTION_OUTPUT)(true);
+	LED2(Driver::GPIO::DIRECTION_OUTPUT)(false);
 	LED3(Driver::GPIO::DIRECTION_OUTPUT)(false);
 
+	volatile static unsigned int cnt = 0;
 	while(1){
-		LED2.Toggle();
-		LED3.Toggle();
+		switch((cnt++) % 3){
+		case 0:
+			LED1(true);
+			LED2(false);
+			LED3(false);
+			break;
+		case 1:
+			LED1(false);
+			LED2(true);
+			LED3(false);
+			break;
+		case 2:
+			LED1(false);
+			LED2(false);
+			LED3(true);
+			break;
+		}
 		Driver::Tick::DelayMs(200);
 	}
 }
