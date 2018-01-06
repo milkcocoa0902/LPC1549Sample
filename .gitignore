@@ -8,3 +8,5 @@ Timer/.settings
 Timer/Debug
 Timer/Release
 .metadata/
+PWM/Debug/
+PWM/Release/
