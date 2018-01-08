@@ -7,13 +7,13 @@
 
 #include <ring_buffer.hpp>
 #include <chip.hpp>
-
+#include <algorithm>
 #include "uart.hpp"
 
-
+#define forever() for(;;)
 
 namespace Driver{
-		constexpr uint32_t Serial::UartChNum;
+		constexpr uint8_t Serial::UartChNum;
 		constexpr size_t Serial::TxSize, Serial::RxSize; //バッファーのサイズ
 		RINGBUFF_T Serial::TxBuf[3], Serial::RxBuf[3];
 		char Serial::TxRaw[3][TxSize], Serial::RxRaw[3][RxSize];
@@ -26,8 +26,8 @@ namespace Driver{
 						id(_id),
 						baud(_baud)
 		{
-			tx(GPIO::DIRECTION_OUTPUT)((CHIP_SWM_PIN_MOVABLE_T)(SWM_UART0_TXD_O + 0x11 * id));
-			rx(GPIO::DIRECTION_INPUT)((CHIP_SWM_PIN_MOVABLE_T)(SWM_UART0_RXD_I + 0x11 * id));
+			tx(GPIO::Direction::Out)((CHIP_SWM_PIN_MOVABLE_T)(SWM_UART0_TXD_O + 0x11 * id));
+			rx(GPIO::Direction::In)((CHIP_SWM_PIN_MOVABLE_T)(SWM_UART0_RXD_I + 0x11 * id));
 
 			//Clock Supply
 			Chip_Clock_SetUARTBaseClockRate(Chip_Clock_GetMainClockRate(), false);

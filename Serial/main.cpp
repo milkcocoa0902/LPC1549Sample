@@ -29,7 +29,7 @@ int main(){
 
 	while(1){
 		if(!serial.IsEmpty()){
-			if(serial.IsExist('\r'))
+			if(serial.IsLine())
 				serial << serial;
 		}
 	}

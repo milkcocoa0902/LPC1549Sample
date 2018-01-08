@@ -20,18 +20,16 @@
 
 namespace Driver{
 	class Serial{
-	private:
-		static constexpr uint32_t UartChNum = 3;
+	public:
+		static constexpr uint8_t UartChNum = 3;
 		static constexpr size_t TxSize = 128, RxSize = 128; //バッファーのサイズ
-		static RINGBUFF_T TxBuf[UartChNum], RxBuf[UartChNum];
+        static RINGBUFF_T TxBuf[UartChNum], RxBuf[UartChNum];
 		static char TxRaw[UartChNum][TxSize], RxRaw[UartChNum][RxSize];
 		static LPC_USART_T* UartBase[UartChNum];
 		static std::array<Util::CallBack, UartChNum> Callback;
 		Driver::GPIO::Digital tx, rx;
-		uint32_t id;
 		uint32_t baud;
-
-
+		uint8_t id;
 	public:
 		Serial() = default;
 		Serial(const std::pair<uint8_t, uint8_t> _tx, const std::pair<uint8_t, uint8_t> _rx, const uint32_t _id, const uint32_t _baud = 115200);
@@ -56,6 +54,9 @@ namespace Driver{
 		void Claer();
 		bool IsBusy();
 		bool IsExist(const char _c);
+		bool IsLine(){
+			return IsExist('\r');
+		}
 		void setBaud(const uint32_t _baud);
 		void SetCallback(const Util::CallBackRef _callback);
 		void SetCallback(const Util::CallBackRRef _callback);
@@ -69,7 +70,6 @@ namespace Driver{
 				func();
 			}
 		}
-
 		void operator<<(const std::string& _str){
 			Write(_str);
 		}
