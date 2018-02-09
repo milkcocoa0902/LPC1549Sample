@@ -35,8 +35,8 @@ int main(){
 	Driver::GPIO::Digital LED3{1, 5};
 
 	// LEDピンの入出力方向
-	LED2(Driver::GPIO::DIRECTION_OUTPUT)(true);
-	LED3(Driver::GPIO::DIRECTION_OUTPUT)(false);
+	LED2(Driver::GPIO::Direction::Out)(true);
+	LED3(Driver::GPIO::Direction::Out)(false);
 
 	// コールバック関数を登録する
 	Driver::Timer timer0(0);

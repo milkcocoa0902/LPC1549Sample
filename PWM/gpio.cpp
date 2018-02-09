@@ -51,7 +51,7 @@ namespace Driver{
 		}
 
 		const Digital& Digital::operator()(const Direction _dir)const{
-			if(_dir == Direction_e::DIRECTION_OUTPUT){
+			if(_dir == Direction::Out){
 				Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin,
 				IOCON_MODE_INACT | IOCON_DIGMODE_EN);
 				Chip_GPIO_SetPinDIROutput(LPC_GPIO, port, pin);

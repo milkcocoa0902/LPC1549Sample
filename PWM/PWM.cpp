@@ -30,11 +30,11 @@ namespace Driver {
 		if(ch < 3){
 			// SCT1_OUT[0-2]
 			// この出力はどのピンにも割り当てられる
-			pin(GPIO::DIRECTION_OUTPUT)((CHIP_SWM_PIN_MOVABLE_T)(SWM_SCT1_OUT0_O + ch));
+			pin(Driver::GPIO::Direction::Out)((CHIP_SWM_PIN_MOVABLE_T)(SWM_SCT1_OUT0_O + ch));
 		}else if(ch < 8){
 			// SCT1_OUT[3-7]
 			// このピンは割り当てを固定されている
-			pin(GPIO::DIRECTION_OUTPUT)((CHIP_SWM_PIN_FIXED_T)(SWM_FIXED_SCT1_OUT3 + ch - 3));
+			pin(Driver::GPIO::Direction::Out)((CHIP_SWM_PIN_FIXED_T)(SWM_FIXED_SCT1_OUT3 + ch - 3));
 		}
 
 		if(freq == 0){

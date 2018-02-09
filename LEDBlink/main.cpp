@@ -30,9 +30,9 @@ int main(){
 	Driver::GPIO::Digital LED1{0, 18}, LED2{0, 10}, LED3{0, 11};
 
 	// LEDピンの入出力方向
-	LED1(Driver::GPIO::DIRECTION_OUTPUT)(true);
-	LED2(Driver::GPIO::DIRECTION_OUTPUT)(false);
-	LED3(Driver::GPIO::DIRECTION_OUTPUT)(false);
+	LED1(Driver::GPIO::Direction::Out)(true);
+	LED2(Driver::GPIO::Direction::Out)(false);
+	LED3(Driver::GPIO::Direction::Out)(false);
 
 	volatile static unsigned int cnt = 0;
 	while(1){
