@@ -12,9 +12,6 @@
 
 namespace Driver{
 	namespace GPIO{
-		Digital LED1{0, 18};
-		Digital LED2{0, 10};
-		Digital LED3{0, 11};
 		Digital::Digital(const uint8_t _port, const uint8_t _pin):
 				port(_port),
 				pin(_pin){
@@ -81,18 +78,6 @@ namespace Driver{
 			Chip_SWM_FixedPinEnable(_fix, true);
 			return *this;
 		}
-
-
-		void Init() {
-			//supply clock
-			Chip_SWM_Init();
-			Chip_GPIO_Init(LPC_GPIO);
-
-			LED1(Direction::Out)({Option::InAct});
-			LED2(Direction::Out)({Option::InAct});
-			LED3(Direction::Out)({Option::InAct});
-		}
-
 	}
 }
 

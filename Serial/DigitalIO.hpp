@@ -78,12 +78,6 @@ namespace Driver{
 			const Digital& operator()(const std::vector<Option>)const;
 			//設定用関数
 		};
-
-		extern Digital LED1;
-		extern Digital LED2;
-		extern Digital LED3;
-
-		void Init();
 	}
 }
 
