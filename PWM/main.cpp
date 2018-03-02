@@ -6,7 +6,7 @@
  */
 
 #include "chip.hpp"
-#include "gpio.hpp"
+#include "DigitalIO.hpp"
 #include "PWM.hpp"
 
 const uint32_t OscRateIn = 12000000;

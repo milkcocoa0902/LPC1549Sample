@@ -5,12 +5,16 @@
  *      Author: Keita
  */
 
-#include "gpio.hpp"
+#include "DigitalIO.hpp"
+
 #include <chip.hpp>
 
 
 namespace Driver{
 	namespace GPIO{
+		Digital LED1{0, 18};
+		Digital LED2{0, 10};
+		Digital LED3{0, 11};
 		Digital::Digital(const uint8_t _port, const uint8_t _pin):
 				port(_port),
 				pin(_pin){
@@ -51,18 +55,21 @@ namespace Driver{
 		}
 
 		const Digital& Digital::operator()(const Direction _dir)const{
-			if(_dir == Direction::Out){
-				Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin,
-				IOCON_MODE_INACT | IOCON_DIGMODE_EN);
-				Chip_GPIO_SetPinDIROutput(LPC_GPIO, port, pin);
-				Chip_GPIO_SetPinState(LPC_GPIO, port, pin, true);
-				return *this;
-			}else{
-				Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin,
-				IOCON_DIGMODE_EN | IOCON_MODE_PULLUP);
-				Chip_GPIO_SetPinDIRInput(LPC_GPIO, port, pin);
-				return *this;
+			Chip_GPIO_SetPinDIR(LPC_GPIO, port, pin, (bool)_dir);
+			Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin, IOCON_DIGMODE_EN);
+
+			return *this;
+		}
+
+		const Digital& Digital::operator()(const std::vector<Option> _option)const{
+			uint32_t options = 0;
+			for(opt : _option){
+				options |= (uint32_t)opt;
 			}
+
+			Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin,
+					IOCON_DIGMODE_EN | options);
+			return *this;
 		}
 
 		const Digital& Digital::operator()(const CHIP_SWM_PIN_MOVABLE_T _func)const{
@@ -74,6 +81,18 @@ namespace Driver{
 			Chip_SWM_FixedPinEnable(_fix, true);
 			return *this;
 		}
+
+
+		void Init() {
+			//supply clock
+			Chip_SWM_Init();
+			Chip_GPIO_Init(LPC_GPIO);
+
+			LED1(Direction::Out)({Option::InAct});
+			LED2(Direction::Out)({Option::InAct});
+			LED3(Direction::Out)({Option::InAct});
+		}
+
 	}
 }
 
