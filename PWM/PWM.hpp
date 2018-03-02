@@ -11,7 +11,7 @@
 #include <chip.hpp>
 #include <stdint.h>
 #include <vector>
-#include "gpio.hpp"
+#include "DigitalIO.hpp"
 
 namespace Driver {
 

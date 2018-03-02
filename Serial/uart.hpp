@@ -14,7 +14,7 @@
 #include <vector>
 #include <utility>
 #include <array>
-#include "gpio.hpp"
+#include "DigitalIO.hpp"
 #include "text.hpp"
 #include "type.hpp"
 
