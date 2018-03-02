@@ -49,9 +49,21 @@ namespace Driver{
 			Analog(const uint8_t _port, const uint8_t _pin, const uint8_t _module, const uint8_t _id);
 			Analog(const Analog&) = default;
 			virtual ~Analog();
-			void Trigger();
 			void SetInput();	// ADCにピンを登録する
 			uint32_t GetInputRaw();	// ADCの値をそのまま返す
+
+			void operator>>(int& _d){
+				_d = (int)GetInputRaw();
+			}
+
+			// データのnビット目が立っているかどうかを確認する
+			bool operator[](int _d){
+				return ((GetInputRaw() >> _d) & 0x1);
+			}
+
+			operator int(){
+				return (int)GetInputRaw();
+			}
 		};
 
 	}

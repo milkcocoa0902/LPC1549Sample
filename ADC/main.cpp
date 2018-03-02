@@ -26,9 +26,9 @@ int main(){
 
 	Driver::GPIO::Analog analog(0, 13, 1, 6);
 	uint32_t result;
+
 	while(1){
-		analog.Trigger();
-		result = analog.GetInputRaw();
+		result = analog;
 		Driver::Tick::DelayMs(500);
 	}
 }
