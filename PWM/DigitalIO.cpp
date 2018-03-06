@@ -35,8 +35,9 @@ namespace Driver{
 			return *this;
 		}
 
-		void Digital::operator()(const bool _flag) const{
+		const Digital& Digital::operator()(const bool _flag) const{
 			Chip_GPIO_SetPinState(LPC_GPIO, port, pin, _flag);
+			return *this;
 		}
 
 		void Digital::operator<<(const bool _flag)const{

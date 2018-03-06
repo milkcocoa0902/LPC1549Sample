@@ -68,7 +68,7 @@ namespace Driver{
 			uint8_t port_()const;
 			uint8_t pin_()const;
 			const Digital& Open()const;
-			void operator()(const bool)const;
+			const Digital& operator()(const bool)const;
 			void operator<<(const bool)const;
 			bool operator()()const;
 			void operator>>(bool&)const;
