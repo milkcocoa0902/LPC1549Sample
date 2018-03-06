@@ -47,7 +47,7 @@ namespace Driver{
 			return Chip_GPIO_GetPinState(LPC_GPIO, port, pin);
 		}
 
-		void Digital::operator>>(bool _in)const{
+		void Digital::operator>>(bool& _in)const{
 			_in = Chip_GPIO_GetPinState(LPC_GPIO, port, pin);
 		}
 
