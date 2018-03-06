@@ -34,7 +34,11 @@ int main(){
 	LED2(Driver::GPIO::Direction::Out)(false);
 	LED3(Driver::GPIO::Direction::Out)(false);
 
+	Driver::GPIO::Digital Switch{0, 4};
+	Switch(Driver::GPIO::Direction::In);
+
 	volatile static unsigned int cnt = 0;
+
 	while(1){
 		switch((cnt++) % 3){
 		case 0:
@@ -54,6 +58,7 @@ int main(){
 			break;
 		}
 		Driver::Tick::DelayMs(200);
+		while(!Switch());
 	}
 }
 
