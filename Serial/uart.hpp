@@ -15,6 +15,7 @@
 #include <utility>
 #include <array>
 #include <stdlib.h>
+#include <stdio.h>
 #include "DigitalIO.hpp"
 #include "text.hpp"
 #include "type.hpp"
@@ -88,15 +89,21 @@ namespace Driver{
 		}
 
 		void operator<<(const int _d){
-			Write(Util::ToStr(_d));
+			char str[16];
+			sprintf(str, "%d", _d);
+			Write(str);
 		}
 
 		void operator<<(const long _ld){
-			Write(Util::ToStr(_ld));
+			char str[16];
+			sprintf(str, "%ld", _ld);
+			Write(str);
 		}
 
 		void operator<<(const float _f){
-			Write(Util::ToStrF(_f));
+			char str[16];
+			sprintf(str, "%f", _f);
+			Write(str);
 		}
 
 		void operator<<(Serial& _serial){

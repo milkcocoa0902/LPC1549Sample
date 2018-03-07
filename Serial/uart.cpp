@@ -123,7 +123,7 @@ namespace Driver{
 			while ((c = ReadByte()) != '\r'){
 				s += c;
 			}
-			return s;
+			return s + '\0';
 		}
 
 		bool Serial::IsEmpty(){
