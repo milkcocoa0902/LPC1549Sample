@@ -14,6 +14,7 @@
 #include <vector>
 #include <utility>
 #include <array>
+#include <stdlib.h>
 #include <stdio.h>
 #include "DigitalIO.hpp"
 #include "text.hpp"
@@ -118,15 +119,15 @@ namespace Driver{
 		}
 
 		void operator>>(int& _d){
-			_d = Util::ToInt32(std::string{ReadByte()});
+			_d = atoi(ReadLine().c_str());
 		}
 
 		void operator>>(long& _ld){
-			_ld = Util::ToInt64(std::string{ReadByte()});
+			_ld = atoi(ReadLine().c_str());
 		}
 
 		void operator>>(float& _f){
-			Util::ToFloat(std::string{ReadByte()});
+			_f = atof(ReadLine().c_str());
 		}
 
 		void operator>>(Serial& _serial){
