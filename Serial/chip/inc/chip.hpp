@@ -163,6 +163,7 @@ extern const uint32_t RTCOscRateIn;
 #include <gpiogroup_15xx.hpp>
 #include <uart_15xx.hpp>
 #include <inmux_15xx.hpp>
+#include <pinint_15xx.hpp>
 
 /** @defgroup SUPPORT_15XX_FUNC CHIP: LPC15xx support functions
  * @ingroup CHIP_15XX_Drivers
