@@ -11,6 +11,8 @@
 #include <chip.hpp>
 #include <stdint.h>
 #include <vector>
+#include <array>
+#include "functional"
 
 
 namespace Driver{
@@ -19,6 +21,10 @@ namespace Driver{
 	using pin_t = uint8_t;
 	using module_t = uint8_t;
 	using id_t = uint8_t;
+
+	using CallBack = std::function<void(void)>;
+	using CallBackRef = const std::function<void(void)>&;
+	using CallBackRRef = std::function<void(void)>&&;
 
 	namespace GPIO{
 		enum class Direction: bool{
@@ -56,10 +62,23 @@ namespace Driver{
 
 		};
 
+		enum class IntEdge: uint32_t{
+			Negative = 0,
+			Positive = 1,
+			Both = 2,
+		};
+
+		constexpr Option operator|(Option left, Option right){
+			return static_cast<Option>(static_cast<int>(left) | static_cast<int>(right));
+		}
+
 		class Digital{
 		public:
 			port_t port;
 			pin_t pin;
+
+			static std::array<CallBack, 8> IntCallback;
+			uint32_t IntCh;
 
 			Digital() = default;
 			Digital(const uint8_t _port, const uint8_t _pin);
@@ -68,14 +87,17 @@ namespace Driver{
 			uint8_t port_()const;
 			uint8_t pin_()const;
 			const Digital& Open()const;
-			const Digital& operator()(const bool)const;
+			void operator()(const bool)const;
 			void operator<<(const bool)const;
 			bool operator()()const;
 			void operator>>(bool&)const;
+			const Digital& EnableInt(const uint32_t, const IntEdge, const CallBackRef _callback = nullptr);
+			const Digital& EnableInt(const uint32_t, const IntEdge, const CallBackRRef);
+			const Digital& DisableInt();
 			const Digital& operator()(const Direction)const;
 			const Digital& operator()(const CHIP_SWM_PIN_MOVABLE_T)const;
 			const Digital& operator()(const CHIP_SWM_PIN_FIXED_T)const;
-			const Digital& operator()(const std::vector<Option>)const;
+			const Digital& operator()(const Option)const;
 			//設定用関数
 		};
 	}
