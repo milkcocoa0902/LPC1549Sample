@@ -11,32 +11,30 @@
 #include <string>
 #include <stdint.h>
 #include <cstring>
-#include <vector>
-#include <utility>
 #include <array>
-#include <stdlib.h>
-#include <stdio.h>
 #include "DigitalIO.hpp"
-#include "text.hpp"
 #include "type.hpp"
+#include "xstring/xstring.hpp"
 
 namespace Driver{
 	class Serial{
-	public:
-		static constexpr uint8_t UartChNum = 3;
+	private:
+		static constexpr uint32_t UartChNum = 3;
 		static constexpr size_t TxSize = 128, RxSize = 128; //バッファーのサイズ
-        static RINGBUFF_T TxBuf[UartChNum], RxBuf[UartChNum];
+		static RINGBUFF_T TxBuf[UartChNum], RxBuf[UartChNum];
 		static char TxRaw[UartChNum][TxSize], RxRaw[UartChNum][RxSize];
 		static LPC_USART_T* UartBase[UartChNum];
 		static std::array<Util::CallBack, UartChNum> Callback;
 		Driver::GPIO::Digital tx, rx;
+		uint32_t id;
 		uint32_t baud;
-		uint8_t id;
+
+
 	public:
 		Serial() = default;
 		Serial(const std::pair<uint8_t, uint8_t> _tx, const std::pair<uint8_t, uint8_t> _rx, const uint32_t _id, const uint32_t _baud = 115200);
 		Serial(const Serial&) = default;
-		virtual ~Serial() = default;
+		virtual ~Serial();
 
 		void Write(const char _c);
 		void Write(const uint8_t* _data, size_t _sz);
@@ -47,6 +45,8 @@ namespace Driver{
 		void WriteLine(const char* line);
 		void WriteLine(const std::vector<uint8_t>& bytes);
 		void Write(const std::string& _text);
+		void Write(const int _data);
+		void Write(const float _data);
 		char ReadByte();
 		std::string Read(const size_t _sz);
 		std::string Read();
@@ -56,14 +56,11 @@ namespace Driver{
 		void Claer();
 		bool IsBusy();
 		bool IsExist(const char _c);
-		bool IsLine(){
-			return IsExist('\r');
-		}
 		void setBaud(const uint32_t _baud);
 		void SetCallback(const Util::CallBackRef _callback);
 		void SetCallback(const Util::CallBackRRef _callback);
 		static void IRQHandler(uint32_t _id){
-			auto isReceive = ((Chip_UART_GetStatus(Serial::UartBase[_id]) & UART_STAT_RXRDY) != 0);
+			auto isReceive = (Chip_UART_GetStatus(Serial::UartBase[_id]) & UART_STAT_RXRDY != 0);
 
 			Chip_UART_IRQRBHandler(Serial::UartBase[_id], &Serial::RxBuf[_id], &Serial::TxBuf[_id]);
 
@@ -72,6 +69,7 @@ namespace Driver{
 				func();
 			}
 		}
+
 		void operator<<(const std::string& _str){
 			Write(_str);
 		}
@@ -89,21 +87,11 @@ namespace Driver{
 		}
 
 		void operator<<(const int _d){
-			char str[16];
-			sprintf(str, "%d", _d);
-			Write(str);
-		}
-
-		void operator<<(const long _ld){
-			char str[16];
-			sprintf(str, "%ld", _ld);
-			Write(str);
+			Write(Util::XString::toString(_d));
 		}
 
 		void operator<<(const float _f){
-			char str[16];
-			sprintf(str, "%f", _f);
-			Write(str);
+			Write(Util::XString::toString(_f));
 		}
 
 		void operator<<(Serial& _serial){
@@ -119,15 +107,15 @@ namespace Driver{
 		}
 
 		void operator>>(int& _d){
-			_d = atoi(ReadLine().c_str());
+			_d = Util::XString::toNumber<int>(ReadLine());
 		}
 
 		void operator>>(long& _ld){
-			_ld = atoi(ReadLine().c_str());
+			_ld = Util::XString::toNumber<long>(ReadLine());
 		}
 
 		void operator>>(float& _f){
-			_f = atof(ReadLine().c_str());
+			_f = Util::XString::toNumber<float>(ReadLine());
 		}
 
 		void operator>>(Serial& _serial){

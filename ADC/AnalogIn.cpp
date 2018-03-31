@@ -37,58 +37,15 @@ namespace Driver{
 		}
 
 
-		bool Analog::isInitialized = false;
+		std::array<bool, 2> Analog::isInitialized = {false, false};
 
 		Analog::Analog(const uint8_t _port, const uint8_t _pin, const uint8_t _module, const uint8_t _id):
 			pin(AnalogPin(_port, _pin, _module, _id)){
 
-			SetInput();
-
-			if(isInitialized)
-				return;
-
-			/// @section ADC0
-			/// supply clock
-			Chip_ADC_Init(LPC_ADC0, 0);
-			Chip_ADC_SetClockRate(LPC_ADC0, ADCSampleClock);
-
-			/// Set Sequencer to SEQ_A
-			Chip_ADC_SetSequencerBits(LPC_ADC0,
-					ADC_SEQA_IDX,
-					ADC_SEQ_CTRL_BURST);
-
-			/// ADC Calibration
-			Chip_ADC_StartCalibration(LPC_ADC0);
-			while(!Chip_ADC_IsCalibrationDone(LPC_ADC0));
-
-			// Start Sequencer
-			Chip_ADC_EnableSequencer(LPC_ADC0, ADC_SEQA_IDX);
-
-
-
-			/// @Section ADC1
-			/// Supply clock
-			Chip_ADC_Init(LPC_ADC1, 0);
-			Chip_ADC_SetClockRate(LPC_ADC1, ADCSampleClock);
-
-			/// Set Sequencer to SEQ_A
-			Chip_ADC_SetSequencerBits(LPC_ADC1,
-					ADC_SEQA_IDX,
-					ADC_SEQ_CTRL_BURST);
-			/// ADC Calibration
-			Chip_ADC_StartCalibration(LPC_ADC1);
-			while(!Chip_ADC_IsCalibrationDone(LPC_ADC1));
-
-
-			// Start Sequencer
-			Chip_ADC_EnableSequencer(LPC_ADC1, ADC_SEQA_IDX);
+			if(!isInitialized[_module])
+				Configuration(_module);
 
 			SetInput();
-			isInitialized = true;
-
-
-			Chip_ADC_StartBurstSequencer(LPC_ADC0, ADC_SEQA_IDX);
-			Chip_ADC_StartBurstSequencer(LPC_ADC1, ADC_SEQA_IDX);
 		}
 
 		Analog::~Analog(){
@@ -106,6 +63,32 @@ namespace Driver{
 					break;
 				}
 			}
+		}
+
+		void Analog::Configuration(uint32_t _ch){
+			auto base = (_ch == 0 ? LPC_ADC0 : LPC_ADC1);
+
+			/// supply clock
+			Chip_ADC_Init(base, 0);
+			Chip_ADC_SetClockRate(base, ADCSampleClock);
+
+			/// Set Sequencer to SEQ_A
+			Chip_ADC_SetSequencerBits(base,
+					ADC_SEQA_IDX,
+					ADC_SEQ_CTRL_BURST);
+
+			/// ADC Calibration
+			Chip_ADC_StartCalibration(base);
+			while(!Chip_ADC_IsCalibrationDone(base));
+
+			// Enable Sequencer
+			Chip_ADC_EnableSequencer(base, ADC_SEQA_IDX);
+
+			// Burst Sequencer
+			Chip_ADC_StartBurstSequencer(base, ADC_SEQA_IDX);
+
+
+			isInitialized[_ch] = true;
 		}
 
 		void Analog::SetInput(){
