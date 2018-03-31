@@ -18,19 +18,11 @@ int main(){
 	Chip_SetupXtalClocking();
 	SystemCoreClockUpdate();
 
-	// スイッチマトリクスモジュールにクロックを供給
-	Chip_SWM_Init();
-
-	// GPIOモジュールにクロックを供給
-	Chip_GPIO_Init(LPC_GPIO);
-
 	Driver::Serial serial({0, 18}, {0, 13}, 0);
-
 
 	while(1){
 		if(!serial.IsEmpty()){
-			if(serial.IsLine())
-				serial << serial;
+			serial << serial;
 		}
 	}
 }

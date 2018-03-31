@@ -7,13 +7,13 @@
 
 #include <ring_buffer.hpp>
 #include <chip.hpp>
-#include <algorithm>
+
 #include "uart.hpp"
 
-#define forever() for(;;)
+
 
 namespace Driver{
-		constexpr uint8_t Serial::UartChNum;
+		constexpr uint32_t Serial::UartChNum;
 		constexpr size_t Serial::TxSize, Serial::RxSize; //バッファーのサイズ
 		RINGBUFF_T Serial::TxBuf[3], Serial::RxBuf[3];
 		char Serial::TxRaw[3][TxSize], Serial::RxRaw[3][RxSize];
@@ -51,6 +51,19 @@ namespace Driver{
 
 		}
 
+		Serial::~Serial(){
+			// 割り込みを無効化
+			NVIC_DisableIRQ((IRQn_Type)(UART0_IRQn + id));
+			Chip_UART_IntDisable(UartBase[id], UART_INTEN_RXRDY | UART_INTEN_TXRDY);
+
+			// クロックの供給を停止
+			Chip_UART_DeInit(UartBase[id]);
+
+			// 送受信バッファのクリア
+			RingBuffer_Init(&TxBuf[id], &TxRaw[id][0], sizeof(char), TxSize);
+			RingBuffer_Init(&RxBuf[id], &RxRaw[id][0], sizeof(char), RxSize);
+		}
+
 		void Serial::Write(const char _c) {
 			while(IsFull());
 			Chip_UART_SendRB(UartBase[id], &TxBuf[id], &_c, sizeof(char));
@@ -70,6 +83,14 @@ namespace Driver{
 
 		void Serial::Write(const std::string& _text) {
 			Write((uint8_t*)_text.data(), _text.length());
+		}
+
+		void Serial::Write(const int _data){
+			Write(Util::XString::toString(_data));
+		}
+
+		void Serial::Write(const float _data){
+			Write(Util::XString::toString(_data));
 		}
 
 		void Serial::WriteLine() {

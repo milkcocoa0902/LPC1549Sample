@@ -12,10 +12,23 @@
 
 namespace Driver{
 	namespace GPIO{
+		bool Digital::isInitialized = false;
 		std::array<CallBack, 8> Digital::IntCallback;
+
 		Digital::Digital(const uint8_t _port, const uint8_t _pin):
 				port(_port),
 				pin(_pin){
+			if(!isInitialized){
+				Chip_GPIO_Init(LPC_GPIO);
+				Chip_PININT_Init(LPC_GPIO_PIN_INT);
+				Chip_SWM_Init();
+				Chip_SWM_DisableFixedPin(SWM_FIXED_SWDIO);
+				Chip_SWM_DisableFixedPin(SWM_FIXED_SWCLK_TCK);
+				isInitialized = true;
+			}
+			Chip_GPIO_SetPinDIROutput(LPC_GPIO, port, pin);
+			Chip_IOCON_PinMuxSet(LPC_IOCON, port, pin, IOCON_DIGMODE_EN);
+			Chip_GPIO_SetPinState(LPC_GPIO, port, pin, false);
 
 		}
 

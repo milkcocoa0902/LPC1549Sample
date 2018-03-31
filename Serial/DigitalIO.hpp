@@ -12,19 +12,18 @@
 #include <stdint.h>
 #include <vector>
 #include <array>
-#include "functional"
+#include <functional>
 
 
 namespace Driver{
 
+	using CallBack = std::function<void(void)>;
+	using CallBackRef = const std::function<void(void)>&;
+	using CallBackRRef = std::function<void(void)>&&;
 	using port_t = uint8_t;
 	using pin_t = uint8_t;
 	using module_t = uint8_t;
 	using id_t = uint8_t;
-
-	using CallBack = std::function<void(void)>;
-	using CallBackRef = const std::function<void(void)>&;
-	using CallBackRRef = std::function<void(void)>&&;
 
 	namespace GPIO{
 		enum class Direction: bool{
@@ -76,6 +75,7 @@ namespace Driver{
 		public:
 			port_t port;
 			pin_t pin;
+			static bool isInitialized;
 
 			static std::array<CallBack, 8> IntCallback;
 			uint32_t IntCh;
@@ -100,6 +100,12 @@ namespace Driver{
 			const Digital& operator()(const Option)const;
 			//設定用関数
 		};
+
+		extern Digital LED1;
+		extern Digital LED2;
+		extern Digital LED3;
+
+		void Init();
 	}
 }
 

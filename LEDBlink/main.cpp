@@ -17,12 +17,6 @@ int main(){
 	Chip_SetupXtalClocking();
 	SystemCoreClockUpdate();
 
-	// スイッチマトリクスモジュールにクロックを供給
-	Chip_SWM_Init();
-
-	// GPIOモジュールにクロックを供給
-	Chip_GPIO_Init(LPC_GPIO);
-
 	// システムタイマの初期化(delay用)
 	Driver::Tick::Init();
 

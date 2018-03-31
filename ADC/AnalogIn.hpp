@@ -39,11 +39,13 @@ namespace Driver{
 
 		class Analog{
 		private:
-			static bool isInitialized;
+			static std::array<bool, 2> isInitialized;
 			static constexpr uint32_t ADCSampleClock = 50000;	// ADCのサンプリングレート[Hz]
 			static constexpr double Vref = 2.5;
 			static constexpr float Resolution = 12;
 			AnalogPin pin;
+
+			void Configuration(uint32_t);
 
 		public:
 			Analog(const uint8_t _port, const uint8_t _pin, const uint8_t _module, const uint8_t _id);

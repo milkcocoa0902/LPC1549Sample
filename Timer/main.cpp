@@ -12,8 +12,8 @@
 const uint32_t OscRateIn = 12000000;
 const uint32_t RTCOscRateIn = 32768;
 
-// LED2 -> P1_8
-Driver::GPIO::Digital LED2{1, 4};
+// LED2 -> PIO0_10
+Driver::GPIO::Digital LED2{0, 10};
 
 void LED2Blink(){
 	LED2.Toggle();
@@ -24,15 +24,8 @@ int main(){
 	Chip_SetupXtalClocking();
 	SystemCoreClockUpdate();
 
-	// スイッチマトリクスモジュールにクロックを供給
-	Chip_SWM_Init();
-
-	// GPIOモジュールにクロックを供給
-	Chip_GPIO_Init(LPC_GPIO);
-
-
-	// LED3 -> P1_5
-	Driver::GPIO::Digital LED3{1, 5};
+	// LED3 -> PIO0_11
+	Driver::GPIO::Digital LED3{0, 11};
 
 	// LEDピンの入出力方向
 	LED2(Driver::GPIO::Direction::Out)(true);
