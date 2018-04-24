@@ -7,8 +7,8 @@
 
 
 #include "chip.hpp"
-#include "AnalogIn.hpp"
-#include "systick.hpp"
+#include "driver/AnalogIn.hpp"
+#include "driver/systick.hpp"
 
 const uint32_t OscRateIn = 12000000;
 const uint32_t RTCOscRateIn = 32768;
