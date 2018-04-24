@@ -6,8 +6,8 @@
  */
 
 #include "chip.hpp"
-#include "DigitalIO.hpp"
-#include "PWM.hpp"
+#include "driver/DigitalIO.hpp"
+#include "driver/PWM.hpp"
 
 const uint32_t OscRateIn = 12000000;
 const uint32_t RTCOscRateIn = 32768;
@@ -17,14 +17,8 @@ int main(){
 	Chip_SetupXtalClocking();
 	SystemCoreClockUpdate();
 
-	// スイッチマトリクスモジュールにクロックを供給
-	Chip_SWM_Init();
-
-	// GPIOモジュールにクロックを供給
-	Chip_GPIO_Init(LPC_GPIO);
-
 	// GPIO0_9をPWM0として設定
-	Driver::PWM pwm({0, 9}, 0);
+	Driver::PWM pwm({0, 13}, Driver::PWM::PWMCh::Ch0);
 
 	// duty比を40%に
 	pwm(40);

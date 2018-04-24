@@ -11,3 +11,5 @@ Timer/Release
 PWM/Debug/
 PWM/Release/
 ADC/Debug
+I2C/Debug
+I2C/.settings
