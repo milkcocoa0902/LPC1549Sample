@@ -7,8 +7,8 @@
 
 
 #include <chip.hpp>
-#include "uart.hpp"
-#include "DigitalIO.hpp"
+#include "driver/comm/uart.hpp"
+#include "driver/DigitalIO.hpp"
 
 const uint32_t OscRateIn = 12000000;
 const uint32_t RTCOscRateIn = 32768;

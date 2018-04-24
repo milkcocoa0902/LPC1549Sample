@@ -6,8 +6,8 @@
  */
 
 #include "chip.hpp"
-#include "DigitalIO.hpp"
-#include "timer.hpp"
+#include "driver/DigitalIO.hpp"
+#include "driver/timer.hpp"
 
 const uint32_t OscRateIn = 12000000;
 const uint32_t RTCOscRateIn = 32768;
